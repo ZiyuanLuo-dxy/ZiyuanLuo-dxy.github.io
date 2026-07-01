@@ -15,6 +15,12 @@
       "nav": "写作文案",
       "title": "用 Claude 中转做写作与文案：接入与实用技巧 | KingFlow",
       "desc": "用 Claude 中转做写作与文案：接入与实用技巧。KingFlow 国内直连、一个 Key 多模型、人民币充值、倍率透明，改一行 Base URL 即可接入。"
+    },
+    {
+      "slug": "claude-proxy-privacy",
+      "nav": "数据隐私",
+      "title": "Claude 中转站数据隐私深度解读：请求日志与合规 | KingFlow",
+      "desc": "Claude 中转站数据隐私深度解读：请求日志与合规。KingFlow 国内直连、一个 Key 多模型、人民币充值、倍率透明，改一行 Base URL 即可接入。"
     }
   ]
 }
