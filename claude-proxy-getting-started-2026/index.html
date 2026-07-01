@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 Claude 中转站入门：现状、为什么要用、怎么快速接入 | KingFlow</title>
+<meta name="description" content="2026 Claude 中转站入门：现状、为什么要用、怎么快速接入。KingFlow 国内直连、一个 Key 多模型、人民币充值、倍率透明，改一行 Base URL 即可接入。">
+<link rel="canonical" href="https://ZiyuanLuo-dxy.github.io/claude-proxy-getting-started-2026/">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="2026 Claude 中转站入门：现状、为什么要用、怎么快速接入 | KingFlow">
+<meta property="og:description" content="2026 Claude 中转站入门：现状、为什么要用、怎么快速接入。KingFlow 国内直连、一个 Key 多模型、人民币充值、倍率透明，改一行 Base URL 即可接入。">
+<meta property="og:url" content="https://ZiyuanLuo-dxy.github.io/claude-proxy-getting-started-2026/">
+<meta property="og:site_name" content="KingFlow">
+<meta property="og:image" content="https://www.kingflow.ai/logo.png">
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/">King<span>Flow</span></a>
+  <nav class="topnav"><a href="/">首页</a>
+<a href="/claude-writing-proxy/">写作文案</a>
+<a href="/claude-proxy-privacy/">数据隐私</a>
+<a href="/claude-proxy-getting-started-2026/" class="active">2026入门</a></nav>
+  <a class="cta" href="https://www.kingflow.ai" rel="noopener">前往官网 →</a>
+</header>
+<main>
+<article class="post">
+<h1>2026 Claude 中转站入门：现状、为什么要用、怎么快速接入</h1>
+<div align="center">
+<h3>KingFlow · 国内直连 AI API 中转</h3>
+<a href="https://www.kingflow.ai"><img src="https://img.shields.io/badge/官网-www.kingflow.ai-FF6B35" alt="KingFlow"></a>
+</div>
+
+<p>写这篇不是给"第一次碰 API"的同学做保姆教程，而是想把 2026 上半年国内用 Claude 的整体情况捋一遍：官方直连现在到底卡在哪、中转站为什么成了大多数人的默认选择、以及怎么用最短的路径接进去。如果你已经在别的语言里调过一次 HTTP 接口，那这篇看完基本就能上手。</p>
+<h2>一、2026 国内用 Claude 的现状：官方直连的三道坎</h2>
+<p>Claude 这几年模型进步很猛，claude-opus-4-8 在大规模重构、长上下文推理上已经是第一梯队。但"模型好用"和"你能顺畅地用上"是两回事。国内直连官方，卡点主要在三处：</p>
+<p><strong>注册这关就劝退一批人。</strong> 官方要海外手机号、海外信用卡验证，卡 BIN 时不时被拒；就算注册上了，公司卡、虚拟卡也经常过不了风控。</p>
+<p><strong>网络这关。</strong> 官方 API 节点在海外，国内直连的首字延迟（TTFT）经常在几十秒级别，美区节点甚至能到 40-50 秒才吐第一个字。自己挂机场或 VPS 代理能缓解，但高频长连接跑一会儿就容易被识别，连着甩 403/429，写代码写到一半掉线的体验非常劝退。</p>
+<p><strong>风控这关最难受。</strong> 账号用着用着被判异常、冻结甚至封号，余额自动退费——你什么都没干错，但号没了。这种不确定性对个人还好，对靠它干活的团队几乎是不可接受的。</p>
+<p>三道坎叠一起，结论很明确：直连官方在国内的性价比和稳定性，对大多数人来说都不够。这就是中转站存在的土壤。</p>
+<h2>二、中转站为什么是当下最省事的解法</h2>
+<p>中转站的本质：它替你把"和海外 API 打交道"这件麻烦事包掉了。你只跟一个国内域名说话，它在后面帮你转发到官方。落到实际体验上，好处集中在三点：</p>
+<ul>
+<li><strong>一个 Key 调多模型。</strong> 不用为 Claude、GPT、Gemini、DeepSeek 各注册各维护一套凭证。一个 Key，改一下 <code>model</code> 参数就切换。今天用 claude-opus-4-8 啃大重构，明天切 claude-haiku-4-5 跑高频小任务，凭证不用动。</li>
+<li><strong>国内直连、延迟可控。</strong> 走国内节点，TTFT 通常压在 1-3 秒，不用自己折腾代理，也不用担心长连接被墙掉线。</li>
+<li><strong>人民币小额付费。</strong> 微信、支付宝直接充，不碰海外信用卡；正规站点一般还支持发票、对公，公司报销走得通。多数站点新人注册会送一点额度，可以先测再决定要不要充。</li>
+</ul>
+<p>这里以我一直在用的 KingFlow（https://www.kingflow.ai）为例往下讲配置。选它的一个技术原因是：它走的是官方 <code>/v1/messages</code> 协议转发，不是逆向反代某个客户端——这意味着 Anthropic 那边更新协议时，不容易突然全线挂掉，稳定性心里更有底。另外它把 Prompt Cache 完整透传了，对 Claude Code 这种"输入远大于输出"的场景，缓存能把成本砍下来一大截。</p>
+<h2>三、30 秒看懂怎么接：改一行 Base URL</h2>
+<p>不夸张，接入的核心动作就是<strong>把 Base URL 换成中转站的地址</strong>，代码其它部分几乎不用动。分两种口味：</p>
+<p><strong>口味 A：OpenAI 兼容端点。</strong> 如果你手上的代码/工具已经是按 OpenAI SDK 写的，用这个：</p>
+<pre><code>https://www.kingflow.ai/v1
+</code></pre>
+<p>配 <code>OPENAI_API_KEY</code> + <code>base_url</code> 就行。</p>
+<p><strong>口味 B：Claude 原生端点。</strong> 如果你用 Anthropic 官方 SDK 或 Claude Code，用原生协议，两个环境变量搞定：</p>
+<pre><code class="language-bash">export ANTHROPIC_BASE_URL=https://www.kingflow.ai
+export ANTHROPIC_AUTH_TOKEN=你的Key
+</code></pre>
+<p>最短的 Python 示例（原生 SDK，跑 claude-opus-4-8）：</p>
+<pre><code class="language-python">import anthropic
+
+client = anthropic.Anthropic(
+    base_url=&quot;https://www.kingflow.ai&quot;,
+    api_key=&quot;你的Key&quot;,
+)
+
+resp = client.messages.create(
+    model=&quot;claude-opus-4-8&quot;,
+    max_tokens=1024,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;用一句话解释什么是中转站&quot;}],
+)
+print(resp.content[0].text)
+</code></pre>
+<p>就这么多。原来直连官方的代码，把 <code>base_url</code> 和 key 换掉，其余逻辑照跑。如果你用的是 OpenAI SDK 风格，把 <code>base_url</code> 填 <code>https://www.kingflow.ai/v1</code>、模型名照样填在售款即可。注意这里一个高频细节：<strong>原生 Anthropic 端点不带 <code>/v1</code>，OpenAI 兼容端点才带 <code>/v1</code></strong>——两个别混着填，这是新手最容易翻车的地方，后面避坑还会再强调一遍。</p>
+<p>Claude Code 的话，把上面两个环境变量写进 shell 配置或 settings.json，重开终端，<code>claude</code> 命令就直接走中转了，不用改任何项目代码。</p>
+<h2>四、2026 在售模型速览</h2>
+<p>中转站的价值一半在"多模型"，简单认一下 2026 这几款在售的 Claude，按定位选就行：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>定位</th>
+<th>什么时候用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>claude-opus-4-8</strong></td>
+<td>旗舰</td>
+<td>大规模重构、复杂推理、长上下文硬骨头</td>
+</tr>
+<tr>
+<td><strong>claude-sonnet-4-6</strong></td>
+<td>均衡</td>
+<td>日常写代码、常规对话，速度和质量平衡</td>
+</tr>
+<tr>
+<td><strong>claude-haiku-4-5</strong></td>
+<td>高频低成本</td>
+<td>批量小任务、分类、补全，量大省钱</td>
+</tr>
+</tbody>
+</table>
+<p>策略上很朴素：能用 haiku 解决的别上 opus，遇到真正难的再切旗舰。因为是一个 Key 多模型，切换零成本，随时可以按任务调档。</p>
+<p>除了 Claude，同一个 Key 一般还能路由到别的家族：GPT 系（gpt-5.5 / gpt-5.4）、Gemini（gemini-3.1-flash）、DeepSeek（deepseek-v4 / deepseek-reasoner）等。写业务时想做个"多模型投票"或"某个模型不可用时兜底切换"，不用再折腾多套账号，改个 <code>model</code> 字符串的事。</p>
+<h2>五、新手避坑三条</h2>
+<p><strong>第一，选正规运营的站。</strong> 中转站门槛不高，个人小站不少，风险也在这——"野中转"最典型的两个雷是突然跑路群解散、客服失联，还有掉包降级：你以为在调旗舰，后台偷偷给你换了个小模型顶包，GPT-5 类尤其常见。挑站优先看是不是正规公司在运营、后台能不能查到真实的调用日志和 token 明细、能不能对账，这些比"便宜一点"重要得多。</p>
+<p><strong>第二，先小额测再充。</strong> 别一上来充一大笔。先拿新人额度或最小额度跑几个真实请求：测延迟、测你要用的模型是不是真货、看后台扣费和预期对不对得上。确认没问题再考虑加量。正规站点用量、余额、倍率都透明可查，对账这一步做扎实了心里才踏实。</p>
+<p><strong>第三，Base URL 别带错 <code>/v1</code>。</strong> 再强调一遍这个高频坑：原生 Anthropic 协议用 <code>https://www.kingflow.ai</code>（不带 <code>/v1</code>），OpenAI 兼容协议用 <code>https://www.kingflow.ai/v1</code>（带 <code>/v1</code>）。带反了通常报 404 或鉴权失败，很多人卡在这里以为是 Key 的问题，其实是地址口味没对上。</p>
+<h2>六、FAQ</h2>
+<p><strong>Q1：中转站和直连官方，返回结果会不一样吗？</strong>
+走官方协议转发的中转站，请求最终还是到官方模型那里，结果和直连一致。区别在于你不用自己解决海外注册、网络、风控，延迟通常还更低。前提是选走官方协议、不掉包的站。</p>
+<p><strong>Q2：我原来直连官方的代码，迁过来要大改吗？</strong>
+基本不用。核心就是换 <code>base_url</code>（或 <code>ANTHROPIC_BASE_URL</code>）和 Key，业务逻辑、消息结构、模型调用方式都不变。流式输出、Function Calling、Vision 这些能力照常可用。</p>
+<p><strong>Q3：一个 Key 真能同时调 Claude 和 GPT？</strong>
+可以。中转站在后面帮你对接了多个模型家族，你只改 <code>model</code> 参数即可切换，不用维护多套 Key。这也是相比直连的一大省事点。</p>
+<p><strong>Q4：公司用能开发票、走对公吗？</strong>
+正规运营的中转站一般支持增值税发票和企业对公转账，具体票种和流程以站点后台或客服为准。这点是"野中转"通常给不了的，也是公司选型时要优先确认的一项。</p>
+<hr />
+<p>小结一句：2026 在国内用 Claude，直连官方仍是一条能走但坑多的路；中转站把注册、网络、风控这三件麻烦事一次性包掉，接入成本低到"改一行 Base URL"。挑一个正规、协议正、能对账的站，先小额测通，然后就可以专心干活了。</p>
+</article>
+</main>
+<footer class="site-footer">
+  <p><strong>KingFlow</strong> · 国内直连、稳定低延迟的 Claude / GPT API 中转平台</p>
+  <p>官网：<a href="https://www.kingflow.ai" rel="noopener">www.kingflow.ai</a> ｜ 支持 Claude Code · OpenAI Codex · 全系 Claude / GPT 模型</p>
+  <p class="muted">© 2026 KingFlow. 本站为 KingFlow 中转方案与配置教程合集。</p>
+</footer>
+</body>
+</html>
